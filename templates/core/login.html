@@ -1,0 +1,141 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Login - UniFlow LMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 150px);
+    }
+
+    .login-card {
+        background: var(--surface);
+        padding: 3rem;
+        border-radius: 24px;
+        box-shadow: var(--shadow-lg);
+        width: 100%;
+        max-width: 450px;
+        text-align: center;
+    }
+
+    .login-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--primary);
+        color: white;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 1.5rem;
+    }
+
+    h2 {
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    p.subtitle {
+        color: var(--text-light);
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        text-align: left;
+        margin-bottom: 1.5rem;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .btn-login {
+        width: 100%;
+        padding: 1rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.1s;
+        margin-top: 1rem;
+    }
+
+    .btn-login:hover {
+        background: var(--primary-dark);
+    }
+
+    .btn-login:active {
+        transform: scale(0.98);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-icon">
+            <i class="fas fa-lock"></i>
+        </div>
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Please enter your credentials to continue</p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_username"><i class="fas fa-envelope"></i> Email Address</label>
+                <input type="email" name="username" id="id_username" required placeholder="name@university.com">
+            </div>
+            
+            <div class="form-group">
+                <label><i class="fas fa-user-tag"></i> Login As</label>
+                <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                    <label style="flex: 1; padding: 0.8rem; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; justify-content: center; font-weight: 500; font-size: 0.85rem;">
+                        <input type="radio" name="role_select" value="student" checked style="accent-color: var(--primary);">
+                        Student
+                    </label>
+                    <label style="flex: 1; padding: 0.8rem; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; justify-content: center; font-weight: 500; font-size: 0.85rem;">
+                        <input type="radio" name="role_select" value="lecturer" style="accent-color: var(--primary);">
+                        Staff
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_password"><i class="fas fa-lock"></i> Password</label>
+                <input type="password" name="password" id="id_password" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn-login">Sign In</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

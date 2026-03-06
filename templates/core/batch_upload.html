@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Batch Student Upload - UniFlow LMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <ul class="breadcrumb">
+        <li>Home</li>
+        <li><a href="{% url 'lecturer_dashboard' %}" style="color: inherit; text-decoration: none;">Management</a></li>
+        <li>Batch Upload</li>
+    </ul>
+    <h1 class="page-title">Batch Student Registration</h1>
+</div>
+
+<div class="card" style="background: var(--surface); padding: 2rem; border-radius: 20px; box-shadow: var(--shadow); max-width: 600px; margin: 0 auto;">
+    <h3 class="card-title"><i class="fas fa-file-csv"></i> Upload Student CSV</h3>
+    <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 2rem;">
+        Upload a CSV file to register multiple students at once. The first row should be a header.
+        <br><strong>Format:</strong> username, email, full_name, temp_password
+    </p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Target Group</label>
+            <select name="group" required style="width: 100%; padding: 0.8rem; border: 1px solid #e2e8f0; border-radius: 12px; font-family: inherit;">
+                {% for group in groups %}
+                <option value="{{ group.id }}">{{ group.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">CSV File</label>
+            <input type="file" name="csv_file" accept=".csv" required style="width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 12px; font-family: inherit;">
+        </div>
+
+        <button type="submit" style="width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer;">
+            Process Upload
+        </button>
+    </form>
+</div>
+{% endblock %}

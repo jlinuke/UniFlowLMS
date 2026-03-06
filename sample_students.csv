@@ -1,0 +1,4 @@
+username,email,full_name,temp_password
+std001,std001@example.com,John Doe,StudentPass123
+std002,std002@example.com,Jane Smith,Welcome2026!
+std003,std003@example.com,Bob Wilson,SecurePassword789
