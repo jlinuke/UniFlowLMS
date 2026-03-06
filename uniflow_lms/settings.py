@@ -4,7 +4,7 @@ import dj_database_url
 import pymysql
 
 # 1. Essential Shim for MySQL on Railway
-pymysql.version_info = (2, 2, 1, "final", 0) 
+pymysql.version_info = (2, 2, 1, "final", 0)
 pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
