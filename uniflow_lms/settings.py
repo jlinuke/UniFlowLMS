@@ -2,6 +2,9 @@ from pathlib import Path
 import os
 import dj_database_url
 import pymysql
+import mimetypes
+mimetypes.add_type("text/css", ".css", True)
+mimetypes.add_type("text/javascript", ".js", True)
 
 # 1. Essential Shim for MySQL on Railway (Fixes version check errors)
 pymysql.version_info = (2, 2, 1, "final", 0)
