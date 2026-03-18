@@ -221,47 +221,31 @@ class BatchUserUploadView(LoginRequiredMixin, View):
 # ==========================================================
 @csrf_exempt
 def link_account_api(request):
-    """
-    Handles student account connection from UniFlow Hub.
-    Bypasses CSRF and handles Email-to-Username mapping.
-    """
-    if request.method != "POST":
-        return JsonResponse({"detail": "Only POST allowed"}, status=405)
-
     try:
         data = json.loads(request.body)
         email_input = data.get("email")
         password_input = data.get("password")
 
-        # 1. First, find the user by email to get their internal username
+        # 1. Map the Email to the actual Username (20260000)
         try:
             target_user = User.objects.get(email=email_input)
-            actual_username = target_user.username
+            actual_username = target_user.username # This will be '20260000'
         except User.DoesNotExist:
-            return JsonResponse({"detail": "User not found."}, status=401)
+            # If they entered the student ID instead of email, try that too
+            actual_username = email_input 
 
-        # 2. Authenticate using the real username and password
+        # 2. Now authenticate using the correct ID
         user = authenticate(request, username=actual_username, password=password_input)
 
         if user is not None:
-            # 3. Security Check: Only Students or Staff can link
-            if user.role != 'student' and not user.is_staff:
-                 return JsonResponse({"detail": "Only student accounts can be linked."}, status=403)
-            
-            # 4. Success - Enable the integration flag automatically upon successful link
             user.hub_integration_enabled = True
             user.save()
-
             return JsonResponse({
                 "status": "success",
-                "user": {
-                    "email": user.email,
-                    "full_name": user.get_full_name() or user.username,
-                    "role": user.role
-                }
+                "user": {"email": user.email, "full_name": user.get_full_name()}
             }, status=200)
 
-        return JsonResponse({"detail": "Invalid credentials."}, status=401)
+        return JsonResponse({"detail": "Invalid username/password."}, status=401)
 
     except Exception as e:
         return JsonResponse({"detail": str(e)}, status=500)
