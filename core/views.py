@@ -133,7 +133,6 @@ class LecturerDashboardView(LoginRequiredMixin, View):
                     group = get_object_or_404(Group, id=group_id)
                     group.students.add(user)
                 messages.success(request, f"Student {full_name} added successfully.")
-        # ... (rest of lecturer POST actions remain unchanged)
         return redirect('lecturer_dashboard')
 
 class StudentDashboardView(LoginRequiredMixin, View):
@@ -218,33 +217,40 @@ class BatchUserUploadView(LoginRequiredMixin, View):
         return redirect('lecturer_dashboard')
 
 # ==========================================================
-# HUB INTEGRATION API - THIS KILLS THE 403 ERROR
+# HUB INTEGRATION API - UPDATED FOR STUDENT AUTH
 # ==========================================================
 @csrf_exempt
 def link_account_api(request):
     """
     Handles student account connection from UniFlow Hub.
-    Bypasses CSRF so Hub Backend can verify student credentials.
+    Bypasses CSRF and handles Email-to-Username mapping.
     """
     if request.method != "POST":
         return JsonResponse({"detail": "Only POST allowed"}, status=405)
 
     try:
         data = json.loads(request.body)
-        email = data.get("email")
-        password = data.get("password")
+        email_input = data.get("email")
+        password_input = data.get("password")
 
-        # Django authenticate uses 'username' field, which is likely your email
-        user = authenticate(request, username=email, password=password)
+        # 1. First, find the user by email to get their internal username
+        try:
+            target_user = User.objects.get(email=email_input)
+            actual_username = target_user.username
+        except User.DoesNotExist:
+            return JsonResponse({"detail": "User not found."}, status=401)
+
+        # 2. Authenticate using the real username and password
+        user = authenticate(request, username=actual_username, password=password_input)
 
         if user is not None:
-            # Check if this is a student account
+            # 3. Security Check: Only Students or Staff can link
             if user.role != 'student' and not user.is_staff:
-                 return JsonResponse({"detail": "Only student accounts can be linked to Hub."}, status=403)
+                 return JsonResponse({"detail": "Only student accounts can be linked."}, status=403)
             
-            # Check the Gatekeeper field we enabled in the shell
-            if not getattr(user, 'hub_integration_enabled', False):
-                return JsonResponse({"detail": "Hub access not enabled for this user."}, status=403)
+            # 4. Success - Enable the integration flag automatically upon successful link
+            user.hub_integration_enabled = True
+            user.save()
 
             return JsonResponse({
                 "status": "success",
@@ -255,7 +261,7 @@ def link_account_api(request):
                 }
             }, status=200)
 
-        return JsonResponse({"detail": "Invalid username or password."}, status=401)
+        return JsonResponse({"detail": "Invalid credentials."}, status=401)
 
     except Exception as e:
         return JsonResponse({"detail": str(e)}, status=500)
