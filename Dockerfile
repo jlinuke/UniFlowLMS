@@ -17,6 +17,6 @@ COPY . .
 # We pass a dummy SECRET_KEY so Django doesn't fail during build
 RUN SECRET_KEY=django-insecure-docker-build-key python manage.py collectstatic --noinput
 
-# Expose port and run Gunicorn
+# Expose port and run Gunicorn (Evaluate Railway's dynamic $PORT)
 EXPOSE 8000
-CMD ["gunicorn", "uniflow_lms.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD gunicorn uniflow_lms.wsgi:application --bind 0.0.0.0:$PORT
