@@ -20,29 +20,40 @@
             <p style="color: var(--text-light);">{{ module.description|default:"No description provided." }}</p>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
-            {% for material in module.materials.all %}
-            <div class="card" style="background: #f8fafc; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem; transition: transform 0.2s;">
-                <div style="width: 60px; height: 60px; background: #fff; color: #ef4444; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                    <i class="fas fa-file-pdf"></i>
-                </div>
-                <div style="flex: 1;">
-                    <h4 style="font-size: 1.1rem; margin-bottom: 0.3rem;">{{ material.title }}</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 1rem;">Uploaded on {{ material.uploaded_at|date:"M d, Y" }}</p>
-                    <div style="display: flex; gap: 1rem;">
-                        <a href="{{ material.file_path.url }}" target="_blank" style="color: var(--primary); font-weight: 700; text-decoration: none; font-size: 0.9rem;">
-                            <i class="fas fa-eye"></i> View PDF
-                        </a>
-                        <a href="{{ material.file_path.url }}" download style="color: var(--text-light); font-weight: 600; text-decoration: none; font-size: 0.9rem;">
-                            <i class="fas fa-download"></i> Download
-                        </a>
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+            {% for week in module.weeks.all %}
+            <div>
+                <h3 style="font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">{{ week.title }}</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+                    {% for material in week.materials.all %}
+                    <div class="card" style="background: #f8fafc; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem; transition: transform 0.2s;">
+                        <div style="width: 60px; height: 60px; background: #fff; color: #ef4444; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <h4 style="font-size: 1.1rem; margin-bottom: 0.3rem;">{{ material.title }}</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 1rem;">Uploaded on {{ material.uploaded_at|date:"M d, Y" }}</p>
+                            <div style="display: flex; gap: 1rem;">
+                                <a href="{{ material.file_path.url }}" target="_blank" style="color: var(--primary); font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+                                    <i class="fas fa-eye"></i> View PDF
+                                </a>
+                                <a href="{{ material.file_path.url }}" download style="color: var(--text-light); font-weight: 600; text-decoration: none; font-size: 0.9rem;">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                        </div>
                     </div>
+                    {% empty %}
+                    <div class="empty-state" style="grid-column: 1/-1; padding: 1.5rem;">
+                        <p>No materials have been uploaded to this week yet.</p>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
             {% empty %}
-            <div class="empty-state" style="grid-column: 1/-1; padding: 3rem;">
+            <div class="empty-state" style="padding: 3rem;">
                 <i class="fas fa-folder-open" style="font-size: 3rem; opacity: 0.1; margin-bottom: 1rem; display: block;"></i>
-                <p>No materials have been uploaded to this topic yet.</p>
+                <p>No weeks have been added to this topic yet.</p>
             </div>
             {% endfor %}
         </div>

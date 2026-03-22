@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import viewsets, permissions
 from .models import Module, Announcement, User, Notification
-from .serializers import ModuleSerializer, AnnouncementSerializer, StudentUserSerializer, NotificationSerializer, ModuleMaterialSerializer
+from .serializers import ModuleSerializer, AnnouncementSerializer, StudentUserSerializer, NotificationSerializer, ModuleMaterialSerializer, ModuleWeekSerializer
 
 class StudentUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.filter(role='student')
@@ -60,8 +60,8 @@ class ModuleContentView(APIView):
         
         # Verify student has access to this module via their groups
         module = get_object_or_404(Module, pk=pk, target_groups__students=request.user)
-        materials = module.materials.all()
-        serializer = ModuleMaterialSerializer(materials, many=True, context={'request': request})
+        weeks = module.weeks.all()
+        serializer = ModuleWeekSerializer(weeks, many=True, context={'request': request})
         return Response({
             "module_id": module.id,
             "module_title": module.title,

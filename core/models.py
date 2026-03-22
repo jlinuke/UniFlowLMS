@@ -55,14 +55,29 @@ class Module(models.Model):
     def __str__(self):
         return self.title
 
+class ModuleWeek(models.Model):
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='weeks')
+    week_number = models.PositiveIntegerField()
+    title = models.CharField(max_length=200, default='New Week')
+    description = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = ('module', 'week_number')
+        ordering = ['week_number']
+
+    def __str__(self):
+        return f"Week {self.week_number} - {self.title} ({self.module.title})"
+
 class ModuleMaterial(models.Model):
-    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='materials')
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='materials_old', null=True, blank=True)
+    week = models.ForeignKey(ModuleWeek, on_delete=models.CASCADE, related_name='materials', null=True, blank=True)
     title = models.CharField(max_length=200)
     file_path = models.FileField(upload_to='modules/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.title} ({self.module.title})"
+        module_title = self.week.module.title if self.week else (self.module.title if self.module else "Unknown")
+        return f"{self.title} ({module_title})"
 
 class Announcement(models.Model):
     title = models.CharField(max_length=200)

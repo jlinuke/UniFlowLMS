@@ -224,6 +224,14 @@
             </div>
 
             <div style="margin-bottom: 0.8rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.2rem;">Week Number</label>
+                <input type="number" name="week_number" value="1" min="1" required style="width:100%; padding:0.6rem; border-radius:8px; border:1px solid #e2e8f0; font-family: inherit; font-size: 0.85rem;">
+            </div>
+            <div style="margin-bottom: 0.8rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.2rem;">Week Title (Optional)</label>
+                <input type="text" name="week_title" placeholder="e.g. Introduction" style="width:100%; padding:0.6rem; border-radius:8px; border:1px solid #e2e8f0; font-family: inherit; font-size: 0.85rem;">
+            </div>
+            <div style="margin-bottom: 0.8rem;">
                 <label style="display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.2rem;">Resource Name (e.g. Lecture 1 Slides)</label>
                 <input type="text" name="material_title" required placeholder="Lecture 1: Basics" style="width:100%; padding:0.6rem; border-radius:8px; border:1px solid #e2e8f0; font-family: inherit; font-size: 0.85rem;">
             </div>
@@ -308,11 +316,14 @@
                 </td>
                 <td>
                     <ul style="list-style: none; padding: 0; margin: 0;">
-                        {% for material in module.materials.all %}
-                        <li style="margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 0.5rem; border-radius: 8px; font-size: 0.85rem;">
-                            <span><i class="fas fa-file-pdf" style="color: #ef4444; margin-right: 0.5rem;"></i> {{ material.title }}</span>
-                            <a href="{{ material.file_path.url }}" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: none;">View</a>
-                        </li>
+                        {% for week in module.weeks.all %}
+                            <li style="margin-top: 0.5rem; margin-bottom: 0.2rem; color: var(--primary); font-weight: bold; font-size: 0.85rem;">{{ week.title }}</li>
+                            {% for material in week.materials.all %}
+                            <li style="margin-bottom: 0.2rem; margin-left: 1rem; display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 0.5rem; border-radius: 8px; font-size: 0.85rem;">
+                                <span><i class="fas fa-file-pdf" style="color: #ef4444; margin-right: 0.5rem;"></i> {{ material.title }}</span>
+                                <a href="{{ material.file_path.url }}" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: none;">View</a>
+                            </li>
+                            {% endfor %}
                         {% empty %}
                         <li style="color: var(--text-light); font-style: italic; font-size: 0.85rem;">No content uploaded yet.</li>
                         {% endfor %}

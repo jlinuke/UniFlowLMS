@@ -111,6 +111,7 @@ class LecturerDashboardView(LoginRequiredMixin, View):
         if not request.user.is_lecturer:
             return redirect('student_dashboard')
         action = request.POST.get('action')
+        
         if action == 'add_student':
             full_name = request.POST.get('full_name')
             student_id = request.POST.get('student_id')
@@ -133,22 +134,65 @@ class LecturerDashboardView(LoginRequiredMixin, View):
                     group = get_object_or_404(Group, id=group_id)
                     group.students.add(user)
                 messages.success(request, f"Student {full_name} added successfully.")
+        
+        elif action == 'simplified_upload':
+            module_id = request.POST.get('existing_module_id')
+            title = request.POST.get('title')
+            material_title = request.POST.get('material_title')
+            pdf_file = request.FILES.get('pdf_file')
+            target_groups = request.POST.getlist('target_groups')
+            week_number = int(request.POST.get('week_number', 1))
+            week_title = request.POST.get('week_title', f"Week {week_number}")
+
+            if module_id:
+                module = get_object_or_404(Module, id=module_id)
+            elif title:
+                module = Module.objects.create(title=title, uploaded_by=request.user)
+                if target_groups:
+                    module.target_groups.set(target_groups)
+            else:
+                messages.error(request, 'Please select or create a topic.')
+                return redirect('lecturer_dashboard')
+
+            if pdf_file and material_title:
+                from .models import ModuleWeek
+                week, _ = ModuleWeek.objects.get_or_create(module=module, week_number=week_number, defaults={'title': week_title or f"Week {week_number}"})
+                ModuleMaterial.objects.create(week=week, module=module, title=material_title, file_path=pdf_file)
+                messages.success(request, f'Resource "{material_title}" added successfully.')
+        
+        elif action == 'send_notification':
+            message = request.POST.get('message')
+            target_groups = request.POST.getlist('target_groups')
+            if message and target_groups:
+                users = User.objects.filter(student_groups__in=target_groups).distinct()
+                for u in users:
+                    Notification.objects.create(recipient=u, message=message, type='announcement')
+                messages.success(request, 'Notification sent.')
+        
         return redirect('lecturer_dashboard')
 
 class StudentDashboardView(LoginRequiredMixin, View):
     def get(self, request):
         if request.user.role == 'lecturer' or request.user.is_staff:
             return redirect('lecturer_dashboard')
-        student_groups = request.user.student_groups.all().prefetch_related('modules', 'modules__materials')
+        student_groups = request.user.student_groups.all().prefetch_related('modules', 'modules__weeks', 'modules__weeks__materials')
         group_modules_data = {}
         for group in student_groups:
             module_list = []
             for module in group.modules.all():
+                weeks_data = []
+                for week in module.weeks.all():
+                    weeks_data.append({
+                        "id": week.id,
+                        "title": week.title,
+                        "materials": [{"title": mat.title, "url": mat.file_path.url} for mat in week.materials.all()]
+                    })
                 module_list.append({
                     "id": str(module.id),
                     "title": module.title,
                     "desc": (module.description or "")[:250],
-                    "materials": [{"title": mat.title, "url": mat.file_path.url} for mat in module.materials.all()]
+                    "weeks": weeks_data,
+                    "materials_count": sum(week.materials.count() for week in module.weeks.all())
                 })
             group_modules_data[str(group.id)] = {"name": group.name, "modules": module_list}
         announcements = Announcement.objects.all().order_by('-created_at')
@@ -163,7 +207,7 @@ class StudentDashboardView(LoginRequiredMixin, View):
 
 class ModuleDetailView(LoginRequiredMixin, View):
     def get(self, request, pk):
-        module = get_object_or_404(Module.objects.prefetch_related('materials'), pk=pk)
+        module = get_object_or_404(Module.objects.prefetch_related('weeks__materials'), pk=pk)
         if request.user.role == 'student':
             user_groups = request.user.student_groups.all()
             if not module.target_groups.filter(id__in=user_groups).exists():

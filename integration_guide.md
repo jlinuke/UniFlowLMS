@@ -79,13 +79,41 @@ Fetching academic data in React should always be proxied through your backend if
 **API Endpoint Table:**
 | Endpoint | Method | Data Returned |
 | :--- | :--- | :--- |
-| `/api/v1/my-modules/` | `GET` | Array of PDFs and Group-targeted resources. |
+| `/api/v1/my-modules/` | `GET` | Array of course modules the student has access to. |
+| `/api/v1/module-content/<pk>/` | `GET` | Specific details for a single module. |
 | `/api/v1/announcements/` | `GET` | Global university news feed. |
 
+### JSON Structure for Modules
+The module API endpoints now group materials by weeks. When fetching `/api/v1/my-modules/` or `/api/v1/module-content/<pk>/`, the `weeks` array will dictate the hierarchy:
+
+```json
+{
+  "id": 1,
+  "title": "Semester 1 Finances",
+  "description": "Introduction to accounting.",
+  "weeks": [
+    {
+      "id": 1,
+      "week_number": 1,
+      "title": "Week 1 - Basics",
+      "description": "Understanding ledgers",
+      "materials": [
+        {
+          "id": 1,
+          "title": "Lecture 1 Slides",
+          "file_path": "/media/modules/lecture1.pdf",
+          "uploaded_at": "2026-03-22T05:58:13Z"
+        }
+      ]
+    }
+  ]
+}
+```
+
 ### PDF Handling
-The API provides a `file_url`. Use this directly in your React components for iframe or viewer rendering:
+From the nested `materials` array, extract the `file_path`. Use this to append to the LMS domain for iframe or viewer rendering:
 ```javascript
-<iframe src={module.file_url} width="100%" height="600px" title={module.title} />
+<iframe src={`http://127.0.0.1:8000${material.file_path}`} width="100%" height="600px" title={material.title} />
 ```
 
 ---

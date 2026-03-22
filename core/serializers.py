@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Module, ModuleMaterial, Announcement, Notification, Group, User
+from .models import Module, ModuleMaterial, Announcement, Notification, Group, User, ModuleWeek
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,12 +11,19 @@ class ModuleMaterialSerializer(serializers.ModelSerializer):
         model = ModuleMaterial
         fields = ['id', 'title', 'file_path', 'uploaded_at']
 
-class ModuleSerializer(serializers.ModelSerializer):
+class ModuleWeekSerializer(serializers.ModelSerializer):
     materials = ModuleMaterialSerializer(many=True, read_only=True)
 
     class Meta:
+        model = ModuleWeek
+        fields = ['id', 'week_number', 'title', 'description', 'materials']
+
+class ModuleSerializer(serializers.ModelSerializer):
+    weeks = ModuleWeekSerializer(many=True, read_only=True)
+
+    class Meta:
         model = Module
-        fields = ['id', 'title', 'description', 'materials', 'uploaded_at']
+        fields = ['id', 'title', 'description', 'weeks', 'uploaded_at']
 
 class AnnouncementSerializer(serializers.ModelSerializer):
     class Meta:
